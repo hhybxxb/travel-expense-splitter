@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>北欧旅行账单 2026</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+    background: #f5f5f7; color: #1d1d1f; padding: 16px;
+    max-width: 1100px; margin: 0 auto;
+  }
+  h1 { font-size: 22px; margin: 16px 0 4px; }
+  .subtitle { font-size: 13px; color: #888; margin-bottom: 16px; }
+  h2 { font-size: 17px; margin: 28px 0 12px; color: #333; border-bottom: 2px solid #e0e0e0; padding-bottom: 6px; }
+  .card {
+    background: white; border-radius: 12px; padding: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin: 12px 0;
+    overflow-x: auto;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: #333; color: white; padding: 8px 6px; text-align: center; white-space: nowrap; }
+  td { padding: 6px; border-bottom: 1px solid #eee; text-align: center; }
+  tr:nth-child(even) { background: #fafafa; }
+  .matrix-table td:first-child { text-align: left; font-weight: 600; background: #f8f8f8; }
+  .matrix-table .total-row td { font-weight: bold; background: #e8f4fd; border-top: 2px solid #007aff; }
+  .matrix-table .total-col { font-weight: bold; background: #f0f7ff !important; }
+  input[type="text"], input[type="number"] {
+    width: 100%; padding: 5px 6px; border: 1px solid #ddd; border-radius: 6px;
+    font-size: 13px; background: white;
+  }
+  input:focus { outline: none; border-color: #007aff; }
+  select {
+    width: 100%; padding: 5px 4px; border: 1px solid #ddd; border-radius: 6px;
+    font-size: 13px; background: white;
+  }
+  .detail-table th { font-size: 12px; padding: 6px 4px; }
+  .detail-table td { padding: 4px 3px; }
+  .detail-table input, .detail-table select { font-size: 12px; padding: 4px 5px; }
+  .btn {
+    padding: 6px 16px; border: none; border-radius: 8px; cursor: pointer;
+    font-size: 13px; margin: 4px 2px; transition: opacity 0.2s;
+  }
+  .btn:hover { opacity: 0.85; }
+  .btn-add { background: #007aff; color: white; }
+  .btn-remove { background: #ff3b30; color: white; font-size: 11px; padding: 3px 8px; }
+  .btn-calc { background: #34c759; color: white; font-size: 15px; padding: 10px 28px; }
+  .final-result {
+    background: linear-gradient(135deg, #667eea, #764ba2); color: white;
+    border-radius: 14px; padding: 24px; margin: 20px 0; text-align: center;
+  }
+  .final-result .amount { font-size: 36px; font-weight: bold; margin: 8px 0; }
+  .final-result .detail { font-size: 13px; color: rgba(255,255,255,0.75); }
+  .note { font-size: 11px; color: #999; margin: 2px 0; }
+  .rate-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+  .rate-item { display: flex; align-items: center; gap: 8px; }
+  .rate-item label { font-size: 13px; white-space: nowrap; min-width: 55px; }
+  .rate-item input { width: 90px; }
+  .summary-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0;
+  }
+  .summary-card {
+    background: white; border-radius: 10px; padding: 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  .summary-card .label { font-size: 12px; color: #888; }
+  .summary-card .value { font-size: 22px; font-weight: bold; margin-top: 4px; }
+  .prefilled { background: #f0f7ff !important; }
+  @media (max-width: 700px) {
+    .summary-grid { grid-template-columns: 1fr; }
+    .rate-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<h1>北欧旅行账单</h1>
+<p class="subtitle">2026年2月 ｜ 三人AA ｜ yj+bx+朋友</p>
+
+<!-- ========== 一、汇率 ========== -->
+<h2>一、汇率设置</h2>
+<div class="card">
+  <div class="rate-grid">
+    <div class="rate-item">
+      <label>1 USD =</label>
+      <input type="number" id="rate-USD" value="6.97" step="0.01" onchange="calculate()">
+      <span class="note">人民币</span>
+    </div>
+    <div class="rate-item">
+      <label>1 EUR =</label>
+      <input type="number" id="rate-EUR" value="7.80" step="0.01" onchange="calculate()">
+      <span class="note">人民币</span>
+    </div>
+    <div class="rate-item">
+      <label>1 NOK =</label>
+      <input type="number" id="rate-NOK" value="0.8496" step="0.0001" onchange="calculate()">
+      <span class="note">人民币</span>
+    </div>
+    <div class="rate-item">
+      <label>1 CHF =</label>
+      <input type="number" id="rate-CHF" value="8.20" step="0.01" onchange="calculate()">
+      <span class="note">人民币</span>
+    </div>
+    <div class="rate-item">
+      <label>1 GBP =</label>
+      <input type="number" id="rate-GBP" value="9.10" step="0.01" onchange="calculate()">
+      <span class="note">人民币</span>
+    </div>
+    <div class="rate-item">
+      <label>1 TWD =</label>
+      <input type="number" id="rate-TWD" value="0.22" step="0.01" onchange="calculate()">
+      <span class="note">人民币</span>
+    </div>
+  </div>
+  <p class="note" style="margin-top:8px">说明：Statement 金额为 USD。下方"金额"列填银行账单上的美元数（Amount 列），系统会用 USD 汇率换算成人民币进行 AA</p>
+</div>
+
+<!-- ========== 二、行程总览矩阵 ========== -->
+<h2>二、行程总览（按日期 × 类别，单位：人民币）</h2>
+<div class="card">
+  <table class="matrix-table" id="matrix-table">
+    <thead>
+      <tr>
+        <th style="min-width:60px">类别</th>
+        <th>2.17</th>
+        <th>2.18</th>
+        <th>2.19</th>
+        <th>2.20</th>
+        <th>2.21</th>
+        <th>2.22</th>
+        <th>其他日期</th>
+        <th class="total-col">合计</th>
+      </tr>
+    </thead>
+    <tbody id="matrix-body"></tbody>
+  </table>
+  <p class="note" style="margin-top:8px">此表自动从下方逐笔明细汇总生成，日期根据消费日期自动归类</p>
+</div>
+
+<!-- ========== 三、我家付的钱 ========== -->
+<h2>三、我付的钱</h2>
+<p class="note">蓝底行 = 已从 Statement 提取，可修改</p>
+<div class="card">
+  <table class="detail-table">
+    <thead>
+      <tr>
+        <th style="width:10%">日期</th>
+        <th style="width:20%">项目</th>
+        <th style="width:10%">金额</th>
+        <th style="width:8%">币种</th>
+        <th style="width:10%">类别</th>
+        <th style="width:32%">备注</th>
+        <th style="width:10%"></th>
+      </tr>
+    </thead>
+    <tbody id="our-body"></tbody>
+  </table>
+  <div style="margin-top:8px">
+    <button class="btn btn-add" onclick="addRow('our')">+ 添加一笔</button>
+  </div>
+</div>
+
+<!-- ========== 四、朋友已付 ========== -->
+<h2>四、朋友已付的钱</h2>
+<p class="note">朋友自己付过的，从她应付金额里扣除</p>
+<div class="card">
+  <table class="detail-table">
+    <thead>
+      <tr>
+        <th style="width:10%">日期</th>
+        <th style="width:20%">项目</th>
+        <th style="width:10%">金额</th>
+        <th style="width:8%">币种</th>
+        <th style="width:10%">类别</th>
+        <th style="width:32%">备注</th>
+        <th style="width:10%"></th>
+      </tr>
+    </thead>
+    <tbody id="friend-body"></tbody>
+  </table>
+  <div style="margin-top:8px">
+    <button class="btn btn-add" onclick="addRow('friend')">+ 添加一笔</button>
+  </div>
+</div>
+
+<!-- ========== 计算 ========== -->
+<div style="text-align:center;margin:24px 0;">
+  <button class="btn btn-calc" onclick="calculate()">计算结果</button>
+</div>
+
+<!-- ========== 五、结果 ========== -->
+<div id="result-area" style="display:none;">
+  <h2>五、计算结果</h2>
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="label">我总共付的（人民币）</div>
+      <div class="value" id="r-our-total">¥0</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">三人AA，朋友应分摊（÷3）</div>
+      <div class="value" id="r-friend-share">¥0</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">朋友已经付过</div>
+      <div class="value" id="r-friend-paid">¥0</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">差额</div>
+      <div class="value" id="r-diff">¥0</div>
+    </div>
+  </div>
+  <div class="final-result">
+    <div id="r-direction">朋友还需要转给你</div>
+    <div class="amount" id="r-final">¥0</div>
+    <div class="detail" id="r-detail"></div>
+  </div>
+</div>
+
+<script>
+const DATES = ['2.17','2.18','2.19','2.20','2.21','2.22','其他日期'];
+const CATEGORIES = ['住宿','餐饮','交通','购物','门票','其他'];
+const CURRENCIES = ['USD','CNY','EUR','NOK','CHF','TWD','GBP'];
+
+let rowId = 0;
+
+const PREFILLED_OUR = [
+  { date:'01/30', name:'LUFTHANSA 机票 yj CDG→ZRH', amount:270.51, cur:'USD', cat:'交通', note:'225.46 EUR' },
+  { date:'02/02', name:'TASA MENG 桃园', amount:76.16, cur:'USD', cat:'其他', note:'2,400 TWD' },
+  { date:'02/02', name:'TASA MENG 桃园', amount:95.20, cur:'USD', cat:'其他', note:'3,000 TWD' },
+  { date:'02/02', name:'TASA MENG 桃园', amount:192.30, cur:'USD', cat:'其他', note:'6,060 TWD' },
+  { date:'02/02', name:'SWISS 机票 bx CDG→ZRH', amount:270.09, cur:'USD', cat:'交通', note:'225.49 EUR' },
+  { date:'02/13', name:'支付宝 PersonalServices', amount:1.01, cur:'USD', cat:'其他', note:'6.99 CNY' },
+  { date:'02/14', name:'Trip.com', amount:882.10, cur:'USD', cat:'交通', note:'机票?' },
+  { date:'02/16', name:'IBIS CDG 机场酒店', amount:12.36, cur:'USD', cat:'住宿', note:'10.40 EUR' },
+  { date:'02/16', name:'SERVICE NAVIGO 巴黎交通卡', amount:36.37, cur:'USD', cat:'交通', note:'30.60 EUR' },
+  { date:'02/16', name:'SERVICE NAVIGO 巴黎交通卡', amount:36.37, cur:'USD', cat:'交通', note:'30.60 EUR' },
+  { date:'02/16', name:'LA DELICE 巴黎', amount:15.33, cur:'USD', cat:'餐饮', note:'12.90 EUR' },
+  { date:'02/16', name:'SAS LIGER MAINTE', amount:9.51, cur:'USD', cat:'餐饮', note:'8.00 EUR' },
+  { date:'02/16', name:'CARREFOUR 超市 巴黎', amount:27.93, cur:'USD', cat:'购物', note:'23.50 EUR' },
+  { date:'02/16', name:'BENOIST 巴黎8区', amount:41.37, cur:'USD', cat:'餐饮', note:'34.80 EUR' },
+  { date:'02/16', name:'KOZY MONTMARTRE 巴黎', amount:5.35, cur:'USD', cat:'餐饮', note:'4.50 EUR' },
+  { date:'02/17', name:'Burger King 苏黎世', amount:12.52, cur:'USD', cat:'餐饮', note:'9.60 CHF' },
+  { date:'02/17', name:'Burger King 苏黎世', amount:17.60, cur:'USD', cat:'餐饮', note:'13.50 CHF' },
+  { date:'02/17', name:'SIXT 租车 斯沃尔韦尔', amount:954.90, cur:'USD', cat:'交通', note:'9,019.69 NOK' },
+  { date:'02/17', name:'EXTRA 超市 Evenskjær', amount:30.30, cur:'USD', cat:'购物', note:'286.20 NOK' },
+  { date:'02/17', name:'住宿 2.17-2.18', amount:2431, cur:'CNY', cat:'住宿', note:'人民币直付' },
+  { date:'02/18', name:'住宿 2.18-2.19', amount:2842, cur:'CNY', cat:'住宿', note:'人民币直付' },
+  { date:'02/18', name:'Bacalao 餐厅 斯沃尔韦尔', amount:58.55, cur:'USD', cat:'餐饮', note:'554.00 NOK' },
+  { date:'02/18', name:'Hotel Booking.com', amount:299.11, cur:'USD', cat:'住宿', note:'2,830.00 NOK' },
+  { date:'02/18', name:'Tesla 充电 奥斯陆', amount:28.89, cur:'USD', cat:'交通', note:'273.35 NOK' },
+  { date:'02/18', name:'KIWI 超市 斯沃尔韦尔', amount:56.64, cur:'USD', cat:'购物', note:'535.93 NOK, 在statement上' },
+  { date:'02/18', name:'KIWI 超市 斯沃尔韦尔', amount:103.80, cur:'NOK', cat:'购物', note:'Apple Pay' },
+  { date:'02/18', name:'KIWI 超市 斯沃尔韦尔', amount:509.70, cur:'NOK', cat:'购物', note:'Apple Pay' },
+  { date:'02/18', name:'KIWI 超市 斯沃尔韦尔', amount:51.30, cur:'NOK', cat:'购物', note:'Apple Pay' },
+  { date:'02/19', name:'Tromso', amount:169.00, cur:'NOK', cat:'其他', note:'Apple Pay 星期一' },
+  { date:'02/19', name:'Starbucks', amount:3.95, cur:'GBP', cat:'餐饮', note:'Apple Pay 星期一' },
+  { date:'02/20', name:'Cc Zara', amount:46.10, cur:'EUR', cat:'购物', note:'Apple Pay 星期二' },
+  { date:'02/20', name:'Liven srl', amount:20.12, cur:'EUR', cat:'交通', note:'Apple Pay 星期二, checkout.stripe.com' },
+  { date:'02/21', name:'Hotel Booking.com', amount:69.00, cur:'EUR', cat:'住宿', note:'Apple Pay 星期三' },
+  { date:'02/20', name:'住宿 2.20-2.21', amount:2762, cur:'CNY', cat:'住宿', note:'人民币直付' },
+  { date:'02/21', name:'住宿 2.21-2.23 (2晚)', amount:2725, cur:'CNY', cat:'住宿', note:'人民币直付' },
+];
+
+function makeOptions(arr, selected) {
+  return arr.map(v => `<option value="${v}"${v === selected ? ' selected' : ''}>${v}</option>`).join('');
+}
+
+function addRow(who, data) {
+  rowId++;
+  const tbody = document.getElementById(who + '-body');
+  const tr = document.createElement('tr');
+  tr.id = who + '-row-' + rowId;
+  if (data) tr.classList.add('prefilled');
+  tr.innerHTML = `
+    <td><input type="text" value="${data ? data.date : ''}" placeholder="MM/DD" style="width:70px"></td>
+    <td><input type="text" value="${data ? data.name : ''}" placeholder="项目名称"></td>
+    <td><input type="number" step="0.01" value="${data ? data.amount : ''}" placeholder="0" onchange="calculate()"></td>
+    <td><select onchange="calculate()">${makeOptions(CURRENCIES, data ? data.cur : (who === 'our' ? 'USD' : 'CNY'))}</select></td>
+    <td><select onchange="calculate()">${makeOptions(CATEGORIES, data ? data.cat : '餐饮')}</select></td>
+    <td><input type="text" value="${data ? data.note : ''}" placeholder="备注"></td>
+    <td><button class="btn btn-remove" onclick="removeRow('${who}-row-${rowId}')">删除</button></td>
+  `;
+  tbody.appendChild(tr);
+}
+
+function removeRow(id) {
+  document.getElementById(id).remove();
+  calculate();
+}
+
+function getRate(cur) {
+  if (cur === 'CNY') return 1;
+  const el = document.getElementById('rate-' + cur);
+  return el ? (parseFloat(el.value) || 1) : 1;
+}
+
+function dateToCol(dateStr) {
+  const m = dateStr.match(/(\d{1,2})\/(\d{1,2})/);
+  if (!m) return '其他日期';
+  const day = parseInt(m[2]);
+  const month = parseInt(m[1]);
+  if (month === 2 && day >= 17 && day <= 22) return '2.' + day;
+  return '其他日期';
+}
+
+function parseRows(who) {
+  const rows = [];
+  document.querySelectorAll(`#${who}-body tr`).forEach(tr => {
+    const inputs = tr.querySelectorAll('input');
+    const selects = tr.querySelectorAll('select');
+    const dateStr = inputs[0]?.value || '';
+    const amount = parseFloat(inputs[2]?.value) || 0;
+    const cur = selects[0]?.value || 'USD';
+    const cat = selects[1]?.value || '其他';
+    const cny = amount * getRate(cur);
+    rows.push({ date: dateStr, amount, cur, cat, cny, col: dateToCol(dateStr) });
+  });
+  return rows;
+}
+
+function buildMatrix(ourRows) {
+  const grid = {};
+  CATEGORIES.forEach(cat => {
+    grid[cat] = {};
+    DATES.forEach(d => { grid[cat][d] = 0; });
+  });
+  ourRows.forEach(r => {
+    if (grid[r.cat]) {
+      grid[r.cat][r.col] = (grid[r.cat][r.col] || 0) + r.cny;
+    }
+  });
+
+  const tbody = document.getElementById('matrix-body');
+  tbody.innerHTML = '';
+
+  CATEGORIES.forEach(cat => {
+    const tr = document.createElement('tr');
+    let rowTotal = 0;
+    let cells = `<td>${cat}</td>`;
+    DATES.forEach(d => {
+      const v = grid[cat][d] || 0;
+      rowTotal += v;
+      cells += `<td>${v > 0 ? '¥' + v.toFixed(0) : '-'}</td>`;
+    });
+    cells += `<td class="total-col">${rowTotal > 0 ? '¥' + rowTotal.toFixed(0) : '-'}</td>`;
+    tr.innerHTML = cells;
+    tbody.appendChild(tr);
+  });
+
+  const totalRow = document.createElement('tr');
+  totalRow.classList.add('total-row');
+  let grandTotal = 0;
+  let totalCells = '<td>合计</td>';
+  DATES.forEach(d => {
+    let colTotal = 0;
+    CATEGORIES.forEach(cat => { colTotal += (grid[cat][d] || 0); });
+    grandTotal += colTotal;
+    totalCells += `<td>${colTotal > 0 ? '¥' + colTotal.toFixed(0) : '-'}</td>`;
+  });
+  totalCells += `<td class="total-col">¥${grandTotal.toFixed(0)}</td>`;
+  totalRow.innerHTML = totalCells;
+  tbody.appendChild(totalRow);
+}
+
+function calculate() {
+  const ourRows = parseRows('our');
+  const friendRows = parseRows('friend');
+
+  const ourTotal = ourRows.reduce((s, r) => s + r.cny, 0);
+  const friendPaid = friendRows.reduce((s, r) => s + r.cny, 0);
+  const friendShare = ourTotal / 3;
+  const friendOwes = friendShare - friendPaid;
+
+  buildMatrix(ourRows);
+
+  document.getElementById('result-area').style.display = 'block';
+  document.getElementById('r-our-total').innerText = '¥' + ourTotal.toFixed(2);
+  document.getElementById('r-friend-share').innerText = '¥' + friendShare.toFixed(2);
+  document.getElementById('r-friend-paid').innerText = '¥' + friendPaid.toFixed(2);
+  document.getElementById('r-diff').innerText = (friendOwes >= 0 ? '¥' : '-¥') + Math.abs(friendOwes).toFixed(2);
+
+  if (friendOwes >= 0) {
+    document.getElementById('r-direction').innerText = '朋友还需要转给我';
+    document.getElementById('r-final').innerText = '¥' + friendOwes.toFixed(2);
+  } else {
+    document.getElementById('r-direction').innerText = '我需要退给朋友';
+    document.getElementById('r-final').innerText = '¥' + Math.abs(friendOwes).toFixed(2);
+  }
+  document.getElementById('r-detail').innerText =
+    `我付 ¥${ourTotal.toFixed(0)} ÷ 3 = 每人 ¥${friendShare.toFixed(0)}，朋友已付 ¥${friendPaid.toFixed(0)}`;
+}
+
+PREFILLED_OUR.forEach(d => addRow('our', d));
+for (let i = 0; i < 5; i++) addRow('our');
+for (let i = 0; i < 3; i++) addRow('friend');
+calculate();
+</script>
+
+</body>
+</html>
